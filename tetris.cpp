@@ -5,7 +5,7 @@
 #include <vector>
 #include <string>
 
-void spawnpiece(std::vector<std::vector<int>> grid){
+void spawnpiece(std::vector<std::vector<int>>& grid){
     grid[0][5]=2;
     grid[1][5]=2;
     grid[2][5]=25;
@@ -14,14 +14,21 @@ void spawnpiece(std::vector<std::vector<int>> grid){
 
 void render(std::vector<std::vector<int>> grid){
     for(int y=0; y<20; y++){
-            for(int x=0; x<10; x++){
-                if(grid[y][x]!=0){
-                    mvaddch(y, x, ACS_CKBOARD);
-                }
+        for(int x=0; x<10; x++){
+            if(grid[y][x]!=0){
+                mvaddch(y, x, ACS_CKBOARD);
             }
         }
+    }
 
-        refresh();
+    for(int y=0; y<20;y++){
+        mvaddch(y, 10, ACS_VLINE);
+    }
+    for(int x=0; x<10;x++){
+        mvaddch(20, x, ACS_HLINE);
+    }
+
+    refresh();
 }
 
 
@@ -39,6 +46,7 @@ int main(){
     srand(time(NULL));
     int random = (rand() % 3) + 1;
 
+    int done=0;
     
     std::vector<std::vector<int>> grid = {
     {0,0,0,0,2,0,0,0,0,0},
@@ -69,11 +77,58 @@ int main(){
         if(ch==27){//escape
             break;
         }
+        done=0;
+        if(ch==KEY_RIGHT){
+            for(int y=0; y<20; y++){
+                for(int x=0; x<10; x++){
+                    if(done==1){break;}
+                    if(grid[y][x]==25 && x < 8 && grid[y][x+2]!=1){
+                        //CLEAR L SHAPE
+                        grid[y-2][x]=0;
+                        grid[y-1][x]=0;
+                        grid[y][x]=0;
+                        grid[y][x+1]=0;
 
+                        //DRAW WITH THE CENTRE
+                        grid[y-2][x+1]=2;
+                        grid[y-1][x+1]=2;
+                        grid[y][x+1]=25; //CETRE
+                        grid[y][x+2]=2;
+                        done=1;
+                        break;
+                    }if(done==1){break;}
+                }if(done==1){break;}
+            }
+        }
+        done=0;
+        if(ch==KEY_LEFT){
+            for(int y=0; y<20; y++){
+                for(int x=0; x<10; x++){
+                    if(done==1){break;}
+                    if(grid[y][x]==25 && x > 0){
+                        //CLEAR L SHAPE
+                        grid[y-2][x]=0;
+                        grid[y-1][x]=0;
+                        grid[y][x]=0;
+                        grid[y][x+1]=0;
+
+                        //DRAW WITH THE CENTRE
+                        grid[y-2][x-1]=2;
+                        grid[y-1][x-1]=2;
+                        grid[y][x-1]=25; //CETRE
+                        grid[y][x]=2;
+                        done=1;
+                        break;
+                    }if(done==1){break;}
+                }if(done==1){break;}
+            }
+        }
+
+        done=0;
         for(int y=0; y<20; y++){
             for(int x=0; x<10; x++){
                 if(grid[y][x]==25){
-                    if(y<19){
+                    if(y<19 && grid[y+1][x]!=1 && grid[y+1][x+1]!=1){
                         //CLEAR L SHAPE
                         grid[y-2][x]=0;
                         grid[y-1][x]=0;
@@ -85,24 +140,30 @@ int main(){
                         grid[y][x]=2;
                         grid[y+1][x]=25; //CETRE
                         grid[y+1][x+1]=2;
+                        done=1;
                         break;
                     }
-                    else if(y==19){
+                    else{
                         grid[y-2][x]=1;
                         grid[y-1][x]=1;
                         grid[y][x]=1;
                         grid[y][x+1]=1;
                         spawnpiece(grid);
+                        done=1;
                         break;
                     }
+
                 }
+                if(done==1){break;}
             }
+            if(done==1){break;}
         }
+        
 
 
         render(grid);
 
-        napms(1000);
+        napms(100);
     }
     
 
