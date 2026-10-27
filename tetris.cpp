@@ -16,15 +16,16 @@ void render(std::vector<std::vector<int>> grid){
     for(int y=0; y<20; y++){
         for(int x=0; x<10; x++){
             if(grid[y][x]!=0){
-                mvaddch(y, x, ACS_CKBOARD);
+                mvaddch(y, x*2, ACS_CKBOARD);
+                mvaddch(y, x*2-1, ACS_CKBOARD);
             }
         }
     }
 
     for(int y=0; y<20;y++){
-        mvaddch(y, 10, ACS_VLINE);
+        mvaddch(y, 20, ACS_VLINE);
     }
-    for(int x=0; x<10;x++){
+    for(int x=0; x<20;x++){
         mvaddch(20, x, ACS_HLINE);
     }
 
