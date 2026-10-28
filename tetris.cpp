@@ -135,6 +135,8 @@ int main(){
                 }if(done==1){break;}
             }
         }
+
+        //   ROTATE
         done=0;
         if(ch==KEY_UP){
             for(int y=0; y<20; y++){
@@ -213,6 +215,8 @@ int main(){
             }
         }
 
+
+        // MOVE DOWN
         done=0;
         for(int y=0; y<20; y++){
             for(int x=0; x<10; x++){
@@ -225,7 +229,7 @@ int main(){
                         grid[y][x]=0;
                         grid[y][x+1]=0;
 
-                        //DRAW WITH THE CENTRE
+                        //DRAW L
                         grid[y-1][x]=2;
                         grid[y][x]=2;
                         grid[y+1][x]=25; //CETRE
@@ -243,6 +247,36 @@ int main(){
                         break;
                     }
 
+                }
+                else if(grid[y][x]==22){
+                    if(y<19 && grid[y+1][x]!=1 && grid[y][x+1]!=1 && grid[y][x+2]!=1){
+
+                        // CLEAR L2
+                        grid[y][x]=0;
+                        grid[y-1][x]=0;
+                        grid[y-1][x+1]=0;
+                        grid[y-1][x+2]=0;
+
+                        grid[y+1][x]=22;
+                        grid[y][x]=2;
+                        grid[y][x+1]=2;
+                        grid[y][x+2]=2;
+
+                        
+                        done=1;
+                        break;
+
+                    }
+
+                    else{
+                        grid[y][x]=1;
+                        grid[y-1][x]=1;
+                        grid[y-1][x+1]=1;
+                        grid[y-1][x+2]=1;
+                        spawnpiece(grid);
+                        done=1;
+                        break;
+                    }
                 }
                 if(done==1){break;}
             }
