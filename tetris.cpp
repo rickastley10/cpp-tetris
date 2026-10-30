@@ -5,11 +5,38 @@
 #include <vector>
 #include <string>
 
+
+
+void clear_piece(std::vector<std::vector<int>>& grid, int piece[8], int x, int y, int res){
+    for(int i = 0; i < 8; i += 2){
+        int Y = y + piece[i];
+        int X = x + piece[i+1];
+        if(Y >= 0 && Y < 20 && X >= 0 && X < 10)
+            grid[Y][X] = res;
+    }
+}
+
+
+void move_piece(std::vector<std::vector<int>>& grid, int piece[8], int x, int y, int mx, int my, int shape){
+    for (int i=0; i<8; i+=2){
+        int Y = y + piece[i] + my;
+        int X = x + piece[i+1] + mx;
+        if(Y >= 0 && Y < 20 && X >= 0 && X < 10){
+            if(piece[i] == 0 && piece[i+1] == 0){
+                grid[Y][X] = shape;
+            }
+            else{
+                grid[Y][X] = 2;
+            }
+        }
+
+    }
+}
+
 void spawnpiece(std::vector<std::vector<int>>& grid){
-    grid[0][5]=2;
-    grid[1][5]=2;
-    grid[2][5]=25;
-    grid[2][6]=2;
+
+    grid[2][5]=3;
+
 }
 
 void drop(std::vector<std::vector<int>>& grid){
@@ -43,6 +70,18 @@ void render(std::vector<std::vector<int>> grid){
     refresh();
 }
 
+int colision(std::vector<std::vector<int>>& grid, int piece[8],
+             int x, int y, int mx, int my, int shape)
+{
+    for(int i = 0; i < 8; i += 2){
+        int Y = y + piece[i]   + my;
+        int X = x + piece[i+1] + mx;
+        if(Y < 0 || Y >= 20 || X < 0 || X >= 10) return 1;  // off board = blocked
+        if(grid[Y][X] == 1) return 1;
+    }
+    return 0;   // ← MUST return 0; this is the ud2 fix
+}
+
 
 int main(){
     initscr();
@@ -58,12 +97,24 @@ int main(){
     srand(time(NULL));
     int random = (rand() % 3) + 1;
 
+    int piece[8]={-2,0,  -1,0,  0,0,  0,1};
+    int flip_piece[8]={-2,0,  -1,0,  0,0,  0,1};
+    int flip_type=1;
+
+    int shape=3;
+
+    // SHAPES
+    int Lshape[8]={-2,0,  -1,0,  0,0,  0,1};
+
     int done=0;
+
+
+    int X=0;int Y=0;
     
     std::vector<std::vector<int>> grid = {
     {0,0,0,0,2,0,0,0,0,0},
     {0,0,0,0,2,0,0,0,0,0},
-    {0,0,0,0,25,2,0,0,0,0},
+    {0,0,0,0,3,2,0,0,0,0},
     {0,0,0,0,0,0,0,0,0,0},
     {0,0,0,0,0,0,0,0,0,0},
     {0,0,0,0,0,0,0,0,0,0},
@@ -94,18 +145,13 @@ int main(){
             for(int y=0; y<20; y++){
                 for(int x=0; x<10; x++){
                     if(done==1){break;}
-                    if(grid[y][x]==25 && x < 8 && (grid[y][x+2]!=1 && grid[y-1][x+1]!=1 && grid[y-2][x+1]!=1)){
-                        //CLEAR L SHAPE
-                        grid[y-2][x]=0;
-                        grid[y-1][x]=0;
-                        grid[y][x]=0;
-                        grid[y][x+1]=0;
+                    if(grid[y][x]==shape){
 
-                        //DRAW L SHAPE
-                        grid[y-2][x+1]=2;
-                        grid[y-1][x+1]=2;
-                        grid[y][x+1]=25; //CETRE
-                        grid[y][x+2]=2;
+                        if(colision(grid, piece, x, y, 1, 0, shape)==0){
+                            clear_piece(grid, piece, x, y, 0);
+                            move_piece(grid, piece, x, y, 1, 0, shape);
+                        }
+                        
                         done=1;
                         break;
                     }if(done==1){break;}
@@ -117,18 +163,12 @@ int main(){
             for(int y=0; y<20; y++){
                 for(int x=0; x<10; x++){
                     if(done==1){break;}
-                    if(grid[y][x]==25 && x > 0 && (grid[y][x-1]!=1 && grid[y-1][x-1]!=1 && grid[y-2][x-1]!=1)){
-                        //CLEAR L SHAPE
-                        grid[y-2][x]=0;
-                        grid[y-1][x]=0;
-                        grid[y][x]=0;
-                        grid[y][x+1]=0;
-
-                        //DRAW L SHAPE
-                        grid[y-2][x-1]=2;
-                        grid[y-1][x-1]=2;
-                        grid[y][x-1]=25; //CETRE
-                        grid[y][x]=2;
+                    if(grid[y][x]==shape){
+                        
+                        if(colision(grid, piece, x, y, -1, 0, shape)==0){
+                            clear_piece(grid, piece, x, y, 0);
+                            move_piece(grid, piece, x, y, -1, 0, shape);
+                        }
                         done=1;
                         break;
                     }if(done==1){break;}
@@ -138,80 +178,76 @@ int main(){
 
         //   ROTATE
         done=0;
-        if(ch==KEY_UP){
-            for(int y=0; y<20; y++){
-                for(int x=0; x<10; x++){
-                    if(done==1){break;}
-                    if(grid[y][x]==25){
-                        //CLEAR L SHAPE
-                        grid[y-2][x]=0;
-                        grid[y-1][x]=0;
-                        grid[y][x]=0;
-                        grid[y][x+1]=0;
+        if(ch == KEY_UP){
+
+            done = 0;
+            for(int y = 0; y < 20; y++){
+                for(int x = 0; x < 10; x++){
+                    if(done == 1){ break; }
+                    if(grid[y][x] == shape){
+
+                        int old_piece[8];
+                        for(int i = 0; i < 8; i++) old_piece[i] = piece[i];
 
 
-                        // DRAW L2 SHAPE
-                        grid[y][x]=22;
-                        grid[y-1][x]=2;
-                        grid[y-1][x+1]=2;
-                        grid[y-1][x+2]=2;
+                        if(flip_type == 1){
+                            flip_piece[0] = piece[1];
+                            flip_piece[1] = -piece[0];
+                            flip_piece[2] = piece[3];
+                            flip_piece[3] = -piece[2];
+                            flip_piece[4] = piece[5];
+                            flip_piece[5] = -piece[4];
+                            flip_piece[6] = piece[7];
+                            flip_piece[7] = -piece[6];
+                            for(int i = 0; i < 8; i++) piece[i] = flip_piece[i];
+                            flip_type++;
+                        }
+                        else if(flip_type == 2){
+                            if(shape == 3) for(int i = 0; i < 8; i++) piece[i] = Lshape[i];
+                            flip_piece[0] = piece[0] * (-1);
+                            flip_piece[1] = piece[1] * (-1);
+                            flip_piece[2] = piece[2] * (-1);
+                            flip_piece[3] = piece[3] * (-1);
+                            flip_piece[4] = piece[4] * (-1);
+                            flip_piece[5] = piece[5] * (-1);
+                            flip_piece[6] = piece[6] * (-1);
+                            flip_piece[7] = piece[7] * (-1);
+                            for(int i = 0; i < 8; i++) piece[i] = flip_piece[i];
+                            flip_type++;
+                        }
+                        else if(flip_type == 3){
+                            if(shape == 3) for(int i = 0; i < 8; i++) piece[i] = Lshape[i];
+                            flip_piece[0] = piece[1];  flip_piece[1] = -piece[0];
+                            flip_piece[2] = piece[3];  flip_piece[3] = -piece[2];
+                            flip_piece[4] = piece[5];  flip_piece[5] = -piece[4];
+                            flip_piece[6] = piece[7];  flip_piece[7] = -piece[6];
+                            for(int i = 0; i < 8; i++) piece[i] = flip_piece[i];
+                            flip_piece[0] = piece[0] * (-1);
+                            flip_piece[1] = piece[1] * (-1);
+                            flip_piece[2] = piece[2] * (-1);
+                            flip_piece[3] = piece[3] * (-1);
+                            flip_piece[4] = piece[4] * (-1);
+                            flip_piece[5] = piece[5] * (-1);
+                            flip_piece[6] = piece[6] * (-1);
+                            flip_piece[7] = piece[7] * (-1);
+                            for(int i = 0; i < 8; i++) piece[i] = flip_piece[i];
+                            flip_type++;
+                        }
+                        else{
+                            if(shape == 3) for(int i = 0; i < 8; i++) piece[i] = Lshape[i];
+                            flip_type = 1;
+                        }
 
-                        done=1;
+
+                        clear_piece(grid, old_piece, x, y, 0);
+                        move_piece(grid, piece, x, y, 0, 0, shape);
+
+                        done = 1;
                         break;
                     }
-                    else if(grid[y][x]==22){
-                        // CLEAR L2 SHAPE
-                        grid[y][x]=0;
-                        grid[y-1][x]=0;
-                        grid[y-1][x+1]=0;
-                        grid[y-1][x+2]=0;
-
-
-                        // DRAW L3 SHAPE
-                        grid[y][x]=23;
-                        grid[y][x+1]=2;
-                        grid[y+1][x+1]=2;
-                        grid[y+2][x+1]=2;
-
-                        done=1;
-                        break;
-                    }
-                    else if(grid[y][x]==23){
-                        // CLEAR L3 SHAPE
-                        grid[y][x]=0;
-                        grid[y][x+1]=0;
-                        grid[y+1][x+1]=0;
-                        grid[y+2][x+1]=0;
-
-
-                        // DRAW L4 SHAPE
-                        grid[y][x]=24;
-                        grid[y+1][x]=2;
-                        grid[y+1][x-1]=2;
-                        grid[y+1][x-2]=2;
-
-                        done=1;
-                        break;
-                    }
-                    else if(grid[y][x]==24){
-                        // CLEAR L4 SHAPE
-                        grid[y][x]=0;
-                        grid[y+1][x]=0;
-                        grid[y+1][x-1]=0;
-                        grid[y+1][x-2]=0;
-
-
-                        // DRAW L SHAPE
-                        grid[y-2][x]=25;
-                        grid[y-1][x]=2;
-                        grid[y][x]=2;
-                        grid[y][x+1]=2;
-
-                        done=1;
-                        break;
-                    }
-
-                }if(done==1){break;}
+                    if(done == 1){ break; }
+                }
+                if(done == 1){ break; }
             }
         }
 
@@ -221,67 +257,27 @@ int main(){
         for(int y=0; y<20; y++){
             for(int x=0; x<10; x++){
                 // L shape
-                if(grid[y][x]==25){
-                    if(y<19 && grid[y+1][x]!=1 && grid[y+1][x+1]!=1){
-                        //CLEAR L SHAPE
-                        grid[y-2][x]=0;
-                        grid[y-1][x]=0;
-                        grid[y][x]=0;
-                        grid[y][x+1]=0;
-
-                        //DRAW L
-                        grid[y-1][x]=2;
-                        grid[y][x]=2;
-                        grid[y+1][x]=25; //CETRE
-                        grid[y+1][x+1]=2;
+                if(grid[y][x]==shape){
+                    if(colision(grid, piece, x, y, 0, 1, shape)==0){
+                        clear_piece(grid, piece, x, y, 0);
+                        move_piece(grid, piece, x, y, 0, 1, shape);
                         done=1;
                         break;
                     }
                     else{
-                        grid[y-2][x]=1;
-                        grid[y-1][x]=1;
-                        grid[y][x]=1;
-                        grid[y][x+1]=1;
+                        clear_piece(grid, piece, x, y, 1);
                         spawnpiece(grid);
                         done=1;
                         break;
                     }
 
-                }
-                else if(grid[y][x]==22){
-                    if(y<19 && grid[y+1][x]!=1 && grid[y][x+1]!=1 && grid[y][x+2]!=1){
-
-                        // CLEAR L2
-                        grid[y][x]=0;
-                        grid[y-1][x]=0;
-                        grid[y-1][x+1]=0;
-                        grid[y-1][x+2]=0;
-
-                        grid[y+1][x]=22;
-                        grid[y][x]=2;
-                        grid[y][x+1]=2;
-                        grid[y][x+2]=2;
-
-                        
-                        done=1;
-                        break;
-
-                    }
-
-                    else{
-                        grid[y][x]=1;
-                        grid[y-1][x]=1;
-                        grid[y-1][x+1]=1;
-                        grid[y-1][x+2]=1;
-                        spawnpiece(grid);
-                        done=1;
-                        break;
-                    }
                 }
                 if(done==1){break;}
             }
             if(done==1){break;}
         }
+
+        // CLEAR LINE
         done=0;
         for(int y=0; y<20; y++){
             if(done==1){break;}
