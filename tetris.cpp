@@ -377,6 +377,8 @@ int main(){
                     else{
                         clear_piece(grid, piece, x, y, 1);
                         spawnpiece(grid, piece, shape);
+                        flip_type=1;
+
                         done=1;
                         break;
                     }
