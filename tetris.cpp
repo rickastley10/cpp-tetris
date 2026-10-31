@@ -96,7 +96,7 @@ void drop(std::vector<std::vector<int>>& grid){
     }
 }
 
-void render(std::vector<std::vector<int>> grid){
+void render(std::vector<std::vector<int>> grid, int score, int level){
     for(int y=0; y<20; y++){
         for(int x=0; x<10; x++){
             if(grid[y][x]!=0){
@@ -112,6 +112,8 @@ void render(std::vector<std::vector<int>> grid){
     for(int x=0; x<20;x++){
         mvaddch(20, x, ACS_HLINE);
     }
+    int x=level*4000 + score;
+    mvprintw(21, 6, "score: %d", x);
 
     refresh();
 }
@@ -128,7 +130,7 @@ int colision(std::vector<std::vector<int>>& grid, int piece[8],
     return 0;   // ← MUST return 0; this is the ud2 fix
 }
 
-void game_over(std::vector<std::vector<int>>& grid, int piece[8], int& shape){
+void game_over(std::vector<std::vector<int>>& grid, int piece[8], int& shape, int& flip_type, int& score, int& level){
     int Lshape[8]={-2,0,  -1,0,  0,0,  0,1};//      3
 
     for(int i=-3;i<10;i++){
@@ -147,6 +149,9 @@ void game_over(std::vector<std::vector<int>>& grid, int piece[8], int& shape){
         }
     }
     for(int i=0;i<8;i++)piece[i]=Lshape[i];
+    flip_type=1;
+    score=0;
+    level=0;
     spawnpiece(grid, piece, shape);
     
 
@@ -154,6 +159,7 @@ void game_over(std::vector<std::vector<int>>& grid, int piece[8], int& shape){
     getch();
     nodelay(stdscr, TRUE);
 }
+
 
 
 int main(){
@@ -185,7 +191,8 @@ int main(){
     int Ishape[8]={2,0,  1,0,  0,0,  3,0};//        8
     int Tshape[8]={0,-1,  0,1,  0,0,  -1,0};//      9
 
-
+    int score=0;
+    int level=0;
 
     int done=0;
 
@@ -382,7 +389,7 @@ int main(){
 
 
         if(grid[2][5]==1 || grid[3][5]==1){
-            game_over(grid, piece, shape);
+            game_over(grid, piece, shape, flip_type, score, level);
         }
 
         // CLEAR LINE
@@ -393,17 +400,24 @@ int main(){
                 grid.erase(grid.begin() + y);
                 grid.insert(grid.begin(), std::vector<int>(10, 0));
                 done=1;
+                score+=100;
                 drop(grid);
                 break;
             }
+        
             
         }
         
+        if(score>4000){
+            level++;
+            score=0;
+        }
+        
+
+        render(grid, score, level);
 
 
-        render(grid);
-
-        napms(200);
+        napms(std::max(10, 200-(level*2)));
     }
     
 
