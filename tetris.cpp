@@ -33,9 +33,55 @@ void move_piece(std::vector<std::vector<int>>& grid, int piece[8], int x, int y,
     }
 }
 
-void spawnpiece(std::vector<std::vector<int>>& grid){
+void spawnpiece(std::vector<std::vector<int>>& grid, int piece[8], int& shape){
+    // SHAPES
+    int Lshape[8]={-2,0,  -1,0,  0,0,  0,1};//      3
+    int Jshape[8]={-2,0,  -1,0,  0,0,  0,-1};//     4
+    int Sshape[8]={-1,0,  -1,1,  0,0,  0,-1};//     5
+    int Oshape[8]={1,0,  1,1,  0,0,  0,1};//        6
+    int Zshape[8]={-1,0,  -1,1,  0,0,  0,-1};//     7
+    int Ishape[8]={2,0,  1,0,  0,0,  3,0};//        8
+    int Tshape[8]={0,-1,  0,1,  0,0,  -1,0};//      9
 
-    grid[2][5]=3;
+
+    shape = (rand() % 7)+3;
+    grid[2][5]=shape;
+    if(grid[2][5]==3){
+        for(int i=0;i<8;i++){
+            piece[i]=Lshape[i];
+        }
+    }
+    else if(grid[2][5]==4){
+        for(int i=0;i<8;i++){
+            piece[i]=Jshape[i];
+        }
+    }
+    else if(grid[2][5]==5){
+        for(int i=0;i<8;i++){
+            piece[i]=Sshape[i];
+        }
+    }
+    else if(grid[2][5]==6){
+        for(int i=0;i<8;i++){
+            piece[i]=Oshape[i];
+        }
+    }
+    else if(grid[2][5]==7){
+        for(int i=0;i<8;i++){
+            piece[i]=Zshape[i];
+        }
+    }
+    else if(grid[2][5]==8){
+        for(int i=0;i<8;i++){
+            piece[i]=Ishape[i];
+        }
+    }
+    else if(grid[2][5]==9){
+        for(int i=0;i<8;i++){
+            piece[i]=Tshape[i];
+        }
+    }
+    
 
 }
 
@@ -55,7 +101,7 @@ void render(std::vector<std::vector<int>> grid){
         for(int x=0; x<10; x++){
             if(grid[y][x]!=0){
                 mvaddch(y, x*2, ACS_CKBOARD);
-                mvaddch(y, x*2-1, ACS_CKBOARD);
+                mvaddch(y, x*2+1, ACS_CKBOARD);
             }
         }
     }
@@ -82,6 +128,33 @@ int colision(std::vector<std::vector<int>>& grid, int piece[8],
     return 0;   // ← MUST return 0; this is the ud2 fix
 }
 
+void game_over(std::vector<std::vector<int>>& grid, int piece[8], int& shape){
+    int Lshape[8]={-2,0,  -1,0,  0,0,  0,1};//      3
+
+    for(int i=-3;i<10;i++){
+        clear();
+        mvprintw(i, 4,   "      GAME OVER       ");
+        mvprintw(i+1, 4, "----------------------");
+        mvprintw(i+2, 4, "press any key to start");
+
+        refresh();
+        napms(50);
+    }
+    shape=3;
+    for(int y=0; y<20; y++){
+        for(int x=0; x<10; x++){
+            grid[y][x]=0;
+        }
+    }
+    for(int i=0;i<8;i++)piece[i]=Lshape[i];
+    spawnpiece(grid, piece, shape);
+    
+
+    nodelay(stdscr, FALSE);
+    getch();
+    nodelay(stdscr, TRUE);
+}
+
 
 int main(){
     initscr();
@@ -104,7 +177,15 @@ int main(){
     int shape=3;
 
     // SHAPES
-    int Lshape[8]={-2,0,  -1,0,  0,0,  0,1};
+    int Lshape[8]={-2,0,  -1,0,  0,0,  0,1};//      3
+    int Jshape[8]={-2,0,  -1,0,  0,0,  0,-1};//     4
+    int Sshape[8]={-1,0,  -1,1,  0,0,  0,-1};//     5
+    int Oshape[8]={1,0,  1,1,  0,0,  0,1};//        6
+    int Zshape[8]={-1,0,  -1,1,  0,0,  0,-1};//     7
+    int Ishape[8]={2,0,  1,0,  0,0,  3,0};//        8
+    int Tshape[8]={0,-1,  0,1,  0,0,  -1,0};//      9
+
+
 
     int done=0;
 
@@ -204,6 +285,14 @@ int main(){
                         }
                         else if(flip_type == 2){
                             if(shape == 3) for(int i = 0; i < 8; i++) piece[i] = Lshape[i];
+                            if(shape == 4) for(int i = 0; i < 8; i++) piece[i] = Jshape[i];
+                            if(shape == 5) for(int i = 0; i < 8; i++) piece[i] = Sshape[i];
+                            if(shape == 6) for(int i = 0; i < 8; i++) piece[i] = Oshape[i];
+                            if(shape == 7) for(int i = 0; i < 8; i++) piece[i] = Zshape[i];
+                            if(shape == 8) for(int i = 0; i < 8; i++) piece[i] = Ishape[i];
+                            if(shape == 9) for(int i = 0; i < 8; i++) piece[i] = Tshape[i];
+
+                            
                             flip_piece[0] = piece[0] * (-1);
                             flip_piece[1] = piece[1] * (-1);
                             flip_piece[2] = piece[2] * (-1);
@@ -217,6 +306,14 @@ int main(){
                         }
                         else if(flip_type == 3){
                             if(shape == 3) for(int i = 0; i < 8; i++) piece[i] = Lshape[i];
+                            if(shape == 4) for(int i = 0; i < 8; i++) piece[i] = Jshape[i];
+                            if(shape == 5) for(int i = 0; i < 8; i++) piece[i] = Sshape[i];
+                            if(shape == 6) for(int i = 0; i < 8; i++) piece[i] = Oshape[i];
+                            if(shape == 7) for(int i = 0; i < 8; i++) piece[i] = Zshape[i];
+                            if(shape == 8) for(int i = 0; i < 8; i++) piece[i] = Ishape[i];
+                            if(shape == 9) for(int i = 0; i < 8; i++) piece[i] = Tshape[i];
+
+
                             flip_piece[0] = piece[1];  flip_piece[1] = -piece[0];
                             flip_piece[2] = piece[3];  flip_piece[3] = -piece[2];
                             flip_piece[4] = piece[5];  flip_piece[5] = -piece[4];
@@ -235,6 +332,12 @@ int main(){
                         }
                         else{
                             if(shape == 3) for(int i = 0; i < 8; i++) piece[i] = Lshape[i];
+                            if(shape == 4) for(int i = 0; i < 8; i++) piece[i] = Jshape[i];
+                            if(shape == 5) for(int i = 0; i < 8; i++) piece[i] = Sshape[i];
+                            if(shape == 6) for(int i = 0; i < 8; i++) piece[i] = Oshape[i];
+                            if(shape == 7) for(int i = 0; i < 8; i++) piece[i] = Zshape[i];
+                            if(shape == 8) for(int i = 0; i < 8; i++) piece[i] = Ishape[i];
+                            if(shape == 9) for(int i = 0; i < 8; i++) piece[i] = Tshape[i];
                             flip_type = 1;
                         }
 
@@ -266,7 +369,7 @@ int main(){
                     }
                     else{
                         clear_piece(grid, piece, x, y, 1);
-                        spawnpiece(grid);
+                        spawnpiece(grid, piece, shape);
                         done=1;
                         break;
                     }
@@ -275,6 +378,11 @@ int main(){
                 if(done==1){break;}
             }
             if(done==1){break;}
+        }
+
+
+        if(grid[2][5]==1 || grid[3][5]==1){
+            game_over(grid, piece, shape);
         }
 
         // CLEAR LINE
