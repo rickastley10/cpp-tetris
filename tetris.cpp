@@ -7,6 +7,7 @@
 
 
 
+
 void clear_piece(std::vector<std::vector<int>>& grid, int piece[8], int x, int y, int res){
     for(int i = 0; i < 8; i += 2){
         int Y = y + piece[i];
@@ -112,7 +113,7 @@ void render(std::vector<std::vector<int>> grid, int score, int level){
     for(int x=0; x<20;x++){
         mvaddch(20, x, ACS_HLINE);
     }
-    int x=level*4000 + score;
+    int x=level*1000 + score;
     mvprintw(21, 6, "score: %d", x);
 
     refresh();
@@ -195,6 +196,8 @@ int main(){
     int level=0;
 
     int done=0;
+
+    int timer=20;
 
 
     int X=0;int Y=0;
@@ -361,33 +364,44 @@ int main(){
             }
         }
 
+        if(ch==KEY_DOWN){
+            timer=0;
+        }
+        
+        if(timer<=0){
+            // MOVE DOWN
+            done=0;
+            for(int y=0; y<20; y++){
+                for(int x=0; x<10; x++){
+                    // L shape
+                    if(grid[y][x]==shape){
+                        if(colision(grid, piece, x, y, 0, 1, shape)==0){
+                            clear_piece(grid, piece, x, y, 0);
+                            move_piece(grid, piece, x, y, 0, 1, shape);
+                            done=1;
+                            break;
+                        }
+                        else{
+                            clear_piece(grid, piece, x, y, 1);
+                            spawnpiece(grid, piece, shape);
+                            flip_type=1;
 
-        // MOVE DOWN
-        done=0;
-        for(int y=0; y<20; y++){
-            for(int x=0; x<10; x++){
-                // L shape
-                if(grid[y][x]==shape){
-                    if(colision(grid, piece, x, y, 0, 1, shape)==0){
-                        clear_piece(grid, piece, x, y, 0);
-                        move_piece(grid, piece, x, y, 0, 1, shape);
-                        done=1;
-                        break;
+                            done=1;
+                            break;
+                        }
+
                     }
-                    else{
-                        clear_piece(grid, piece, x, y, 1);
-                        spawnpiece(grid, piece, shape);
-                        flip_type=1;
-
-                        done=1;
-                        break;
-                    }
-
+                    if(done==1){break;}
                 }
                 if(done==1){break;}
             }
-            if(done==1){break;}
+            timer=std::max(1, 20-level*2/10);
+            
         }
+        else if(timer>0){
+            timer--;
+        }
+        
 
 
         if(grid[2][5]==1 || grid[3][5]==1){
@@ -410,7 +424,7 @@ int main(){
             
         }
         
-        if(score>4000){
+        if(score>1000){
             level++;
             score=0;
         }
@@ -419,7 +433,7 @@ int main(){
         render(grid, score, level);
 
 
-        napms(std::max(10, 200-(level*2)));
+        napms(10);
     }
     
 
