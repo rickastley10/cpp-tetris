@@ -39,7 +39,7 @@ void spawnpiece(std::vector<std::vector<int>>& grid, int piece[8], int& shape){
     int Jshape[8]={-2,0,  -1,0,  0,0,  0,-1};//     4
     int Sshape[8]={-1,0,  -1,1,  0,0,  0,-1};//     5
     int Oshape[8]={1,0,  1,1,  0,0,  0,1};//        6
-    int Zshape[8]={-1,0,  -1,1,  0,0,  0,-1};//     7
+    int Zshape[8]={-1,0, -1,-1, 0,0, 0,1};//     7
     int Ishape[8]={2,0,  1,0,  0,0,  3,0};//        8
     int Tshape[8]={0,-1,  0,1,  0,0,  -1,0};//      9
 
@@ -181,7 +181,7 @@ int main(){
     int Jshape[8]={-2,0,  -1,0,  0,0,  0,-1};//     4
     int Sshape[8]={-1,0,  -1,1,  0,0,  0,-1};//     5
     int Oshape[8]={1,0,  1,1,  0,0,  0,1};//        6
-    int Zshape[8]={-1,0,  -1,1,  0,0,  0,-1};//     7
+    int Zshape[8]={-1,0, -1,-1, 0,0, 0,1};//     7
     int Ishape[8]={2,0,  1,0,  0,0,  3,0};//        8
     int Tshape[8]={0,-1,  0,1,  0,0,  -1,0};//      9
 
