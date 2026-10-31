@@ -232,7 +232,7 @@ int main(){
             break;
         }
         done=0;
-        if(ch==KEY_RIGHT){
+        if(ch==KEY_RIGHT || ch=='d' || ch=='l'){
             for(int y=0; y<20; y++){
                 for(int x=0; x<10; x++){
                     if(done==1){break;}
@@ -250,7 +250,7 @@ int main(){
             }
         }
         done=0;
-        if(ch==KEY_LEFT){
+        if(ch==KEY_LEFT || ch=='a' || ch=='j'){
             for(int y=0; y<20; y++){
                 for(int x=0; x<10; x++){
                     if(done==1){break;}
@@ -269,7 +269,7 @@ int main(){
 
         //   ROTATE
         done=0;
-        if(ch == KEY_UP){
+        if(ch == KEY_UP || ch=='w' || ch=='i'){
 
             done = 0;
             for(int y = 0; y < 20; y++){
@@ -364,7 +364,7 @@ int main(){
             }
         }
 
-        if(ch==KEY_DOWN){
+        if(ch==KEY_DOWN || ch=='s' || ch=='k'){
             timer=0;
         }
         
