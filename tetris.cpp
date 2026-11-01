@@ -97,24 +97,34 @@ void drop(std::vector<std::vector<int>>& grid){
     }
 }
 
-void render(std::vector<std::vector<int>> grid, int score, int level){
+void render(std::vector<std::vector<int>> grid, int score, int level, int size){
+    
     for(int y=0; y<20; y++){
         for(int x=0; x<10; x++){
             if(grid[y][x]!=0){
-                mvaddch(y, x*2, ACS_CKBOARD);
-                mvaddch(y, x*2+1, ACS_CKBOARD);
+
+                mvaddch(y*size, (x*2)*size, ACS_CKBOARD);
+                mvaddch(y*size, (x*2)*size+1, ACS_CKBOARD);
+                if(size>1){
+                    for(int dy = 0; dy < size; dy++){
+                        for(int dx = 0; dx < 2 * size; dx++){
+                            mvaddch(y*size + dy, (x*2)*size + dx, ACS_CKBOARD);
+                        }
+                    }
+                }
+
             }
         }
     }
 
-    for(int y=0; y<20;y++){
-        mvaddch(y, 20, ACS_VLINE);
+    for(int y=0; y<(20*size);y++){
+        mvaddch(y, 20*size, ACS_VLINE);
     }
-    for(int x=0; x<20;x++){
-        mvaddch(20, x, ACS_HLINE);
+    for(int x=0; x<(20*size);x++){
+        mvaddch(20*size, x, ACS_HLINE);
     }
     int x=level*1000 + score;
-    mvprintw(21, 6, "score: %d", x);
+    mvprintw((20 * size + 1), 6, "score: %d", x);
 
     refresh();
 }
@@ -161,6 +171,26 @@ void game_over(std::vector<std::vector<int>>& grid, int piece[8], int& shape, in
     nodelay(stdscr, TRUE);
 }
 
+void reset_shape(int shape, int (&piece)[8]){
+    int Lshape[8]={-2,0,  -1,0,  0,0,  0,1};//      3
+    int Jshape[8]={-2,0,  -1,0,  0,0,  0,-1};//     4
+    int Sshape[8]={-1,0,  -1,1,  0,0,  0,-1};//     5
+    int Oshape[8]={1,0,  1,1,  0,0,  0,1};//        6
+    int Zshape[8]={-1,0, -1,-1, 0,0, 0,1};//        7
+    int Ishape[8]={2,0,  1,0,  0,0,  3,0};//        8
+    int Tshape[8]={0,-1,  0,1,  0,0,  -1,0};//      9
+
+
+    if(shape == 3) for(int i = 0; i < 8; i++) piece[i] = Lshape[i];
+    if(shape == 4) for(int i = 0; i < 8; i++) piece[i] = Jshape[i];
+    if(shape == 5) for(int i = 0; i < 8; i++) piece[i] = Sshape[i];
+    if(shape == 6) for(int i = 0; i < 8; i++) piece[i] = Oshape[i];
+    if(shape == 7) for(int i = 0; i < 8; i++) piece[i] = Zshape[i];
+    if(shape == 8) for(int i = 0; i < 8; i++) piece[i] = Ishape[i];
+    if(shape == 9) for(int i = 0; i < 8; i++) piece[i] = Tshape[i];
+
+}
+
 
 
 int main(){
@@ -188,7 +218,7 @@ int main(){
     int Jshape[8]={-2,0,  -1,0,  0,0,  0,-1};//     4
     int Sshape[8]={-1,0,  -1,1,  0,0,  0,-1};//     5
     int Oshape[8]={1,0,  1,1,  0,0,  0,1};//        6
-    int Zshape[8]={-1,0, -1,-1, 0,0, 0,1};//     7
+    int Zshape[8]={-1,0, -1,-1, 0,0, 0,1};//        7
     int Ishape[8]={2,0,  1,0,  0,0,  3,0};//        8
     int Tshape[8]={0,-1,  0,1,  0,0,  -1,0};//      9
 
@@ -198,9 +228,10 @@ int main(){
     int done=0;
 
     int timer=20;
-
+    int size=1;
 
     int X=0;int Y=0;
+    int center_x=0;int center_y=0;
     
     std::vector<std::vector<int>> grid = {
     {0,0,0,0,2,0,0,0,0,0},
@@ -232,39 +263,45 @@ int main(){
             break;
         }
         done=0;
-        if(ch==KEY_RIGHT || ch=='d' || ch=='l'){
-            for(int y=0; y<20; y++){
-                for(int x=0; x<10; x++){
-                    if(done==1){break;}
-                    if(grid[y][x]==shape){
+        for(int y=0; y<20; y++){
+            for(int x=0; x<10; x++){
+                if(done==1){break;}
+                if(grid[y][x]==shape){
+                    center_x=x;
+                    center_y=y;
+                    done=1;
+                    break;
+                }
+            }
+            if(done==1){break;}
+        }done=0;
 
-                        if(colision(grid, piece, x, y, 1, 0, shape)==0){
-                            clear_piece(grid, piece, x, y, 0);
-                            move_piece(grid, piece, x, y, 1, 0, shape);
-                        }
-                        
-                        done=1;
-                        break;
-                    }if(done==1){break;}
-                }if(done==1){break;}
-            }
+        if(ch=='1'){
+            size=1;
         }
-        done=0;
-        if(ch==KEY_LEFT || ch=='a' || ch=='j'){
-            for(int y=0; y<20; y++){
-                for(int x=0; x<10; x++){
-                    if(done==1){break;}
-                    if(grid[y][x]==shape){
-                        
-                        if(colision(grid, piece, x, y, -1, 0, shape)==0){
-                            clear_piece(grid, piece, x, y, 0);
-                            move_piece(grid, piece, x, y, -1, 0, shape);
-                        }
-                        done=1;
-                        break;
-                    }if(done==1){break;}
-                }if(done==1){break;}
+        if(ch=='2'){
+            size=2;
+        }
+        if(ch=='3'){
+            size=3;
+        }
+
+        if(ch==KEY_RIGHT || ch=='d' || ch=='l'){
+
+            if(colision(grid, piece, center_x, center_y, 1, 0, shape)==0){
+                clear_piece(grid, piece, center_x, center_y, 0);
+                move_piece(grid, piece, center_x, center_y, 1, 0, shape);
             }
+
+        }
+        
+        if(ch==KEY_LEFT || ch=='a' || ch=='j'){
+
+                        if(colision(grid, piece, center_x, center_y, -1, 0, shape)==0){
+                            clear_piece(grid, piece, center_x, center_y, 0);
+                            move_piece(grid, piece, center_x, center_y, -1, 0, shape);
+                        }
+
         }
 
         //   ROTATE
@@ -282,6 +319,8 @@ int main(){
 
 
                         if(flip_type == 1){
+                            reset_shape(shape, piece);
+
                             flip_piece[0] = piece[1];
                             flip_piece[1] = -piece[0];
                             flip_piece[2] = piece[3];
@@ -290,18 +329,13 @@ int main(){
                             flip_piece[5] = -piece[4];
                             flip_piece[6] = piece[7];
                             flip_piece[7] = -piece[6];
-                            for(int i = 0; i < 8; i++) piece[i] = flip_piece[i];
-                            flip_type++;
+                            if(colision(grid, flip_piece, x, y, 0, 0, shape)==0){
+                                for(int i = 0; i < 8; i++) piece[i] = flip_piece[i];
+                                flip_type++;
+                            }
                         }
                         else if(flip_type == 2){
-                            if(shape == 3) for(int i = 0; i < 8; i++) piece[i] = Lshape[i];
-                            if(shape == 4) for(int i = 0; i < 8; i++) piece[i] = Jshape[i];
-                            if(shape == 5) for(int i = 0; i < 8; i++) piece[i] = Sshape[i];
-                            if(shape == 6) for(int i = 0; i < 8; i++) piece[i] = Oshape[i];
-                            if(shape == 7) for(int i = 0; i < 8; i++) piece[i] = Zshape[i];
-                            if(shape == 8) for(int i = 0; i < 8; i++) piece[i] = Ishape[i];
-                            if(shape == 9) for(int i = 0; i < 8; i++) piece[i] = Tshape[i];
-
+                            reset_shape(shape, piece);
                             
                             flip_piece[0] = piece[0] * (-1);
                             flip_piece[1] = piece[1] * (-1);
@@ -311,18 +345,13 @@ int main(){
                             flip_piece[5] = piece[5] * (-1);
                             flip_piece[6] = piece[6] * (-1);
                             flip_piece[7] = piece[7] * (-1);
-                            for(int i = 0; i < 8; i++) piece[i] = flip_piece[i];
-                            flip_type++;
+                            if(colision(grid, flip_piece, x, y, 0, 0, shape)==0){
+                                for(int i = 0; i < 8; i++) piece[i] = flip_piece[i];
+                                flip_type++;
+                            }
                         }
                         else if(flip_type == 3){
-                            if(shape == 3) for(int i = 0; i < 8; i++) piece[i] = Lshape[i];
-                            if(shape == 4) for(int i = 0; i < 8; i++) piece[i] = Jshape[i];
-                            if(shape == 5) for(int i = 0; i < 8; i++) piece[i] = Sshape[i];
-                            if(shape == 6) for(int i = 0; i < 8; i++) piece[i] = Oshape[i];
-                            if(shape == 7) for(int i = 0; i < 8; i++) piece[i] = Zshape[i];
-                            if(shape == 8) for(int i = 0; i < 8; i++) piece[i] = Ishape[i];
-                            if(shape == 9) for(int i = 0; i < 8; i++) piece[i] = Tshape[i];
-
+                            reset_shape(shape, piece);
 
                             flip_piece[0] = piece[1];  flip_piece[1] = -piece[0];
                             flip_piece[2] = piece[3];  flip_piece[3] = -piece[2];
@@ -337,17 +366,16 @@ int main(){
                             flip_piece[5] = piece[5] * (-1);
                             flip_piece[6] = piece[6] * (-1);
                             flip_piece[7] = piece[7] * (-1);
-                            for(int i = 0; i < 8; i++) piece[i] = flip_piece[i];
-                            flip_type++;
+                            
+                            if(colision(grid, flip_piece, x, y, 0, 0, shape)==0){
+                                for(int i = 0; i < 8; i++) piece[i] = flip_piece[i];
+                                flip_type++;
+                            }
+                            
+                            
                         }
                         else{
-                            if(shape == 3) for(int i = 0; i < 8; i++) piece[i] = Lshape[i];
-                            if(shape == 4) for(int i = 0; i < 8; i++) piece[i] = Jshape[i];
-                            if(shape == 5) for(int i = 0; i < 8; i++) piece[i] = Sshape[i];
-                            if(shape == 6) for(int i = 0; i < 8; i++) piece[i] = Oshape[i];
-                            if(shape == 7) for(int i = 0; i < 8; i++) piece[i] = Zshape[i];
-                            if(shape == 8) for(int i = 0; i < 8; i++) piece[i] = Ishape[i];
-                            if(shape == 9) for(int i = 0; i < 8; i++) piece[i] = Tshape[i];
+                            reset_shape(shape, piece);
                             flip_type = 1;
                         }
 
@@ -395,7 +423,7 @@ int main(){
                 }
                 if(done==1){break;}
             }
-            timer=std::max(1, 20-level*2/10);
+            timer=std::max(1, 20-level*2);
             
         }
         else if(timer>0){
@@ -430,7 +458,7 @@ int main(){
         }
         
 
-        render(grid, score, level);
+        render(grid, score, level, size);
 
 
         napms(10);
