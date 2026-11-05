@@ -191,6 +191,19 @@ void reset_shape(int shape, int (&piece)[8]){
 
 }
 
+void pause(){
+    clear();
+    mvprintw(3, 4, "          PAUSED         ");
+    mvprintw(4, 4, "-------------------------");
+    mvprintw(5, 4, "press any key to continue");
+
+    refresh();
+    napms(50);
+    nodelay(stdscr, FALSE);
+    getch();
+    nodelay(stdscr, TRUE);
+}
+
 
 
 int main(){
@@ -430,6 +443,12 @@ int main(){
             timer--;
         }
         
+
+
+        if(ch==' '){
+            pause();
+        }
+
 
 
         if(grid[2][5]==1 || grid[3][5]==1){
